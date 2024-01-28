@@ -45,24 +45,31 @@ headers = {
 }
 
 
+def get_urls():
+    # перебираем ссылки
+    with open("catalog_links.txt", "r") as file:
+        products = file.readlines()
+    base_url= [line.strip().rstrip(',') for line in products]
+    return base_url
 
-# перебираем ссылки
-with open("catalog_links.txt", "r") as file:
-    products = file.readlines()
-base_url= [line.strip().rstrip(',') for line in products]
 
-for url in base_url:
-# вычленяем номер продуктов из ссылки
-    parsed_url = urlparse(url)
-    query_params = parse_qs(parsed_url.query)
-    if 'tree' in query_params:
-        del query_params['tree']
-    product_number = parsed_url.path.split("/")[-1]
-    print(product_number)
+def get_node_id_from_url(base_url):
+    list_of_nodes = []
+    for url in base_url:
+        # вычленяем номер продуктов из ссылки
+        parsed_url = urlparse(url)
+        query_params = parse_qs(parsed_url.query)
+        if 'tree' in query_params:
+            del query_params['tree']
+        product_number = parsed_url.path.split("/")[-1]
+        list_of_nodes.append(product_number)
+    return list_of_nodes
 
+
+def get_info_from_api(node_id, page):
     json_data = {
-        'nodeId': product_number,
-        'page': 1,
+        'nodeId': node_id,
+        'page': page,
         'filters': {
             'InitialLoad': True,
             'IsTechnicalSelectorsAvailable': False,
@@ -81,9 +88,37 @@ for url in base_url:
         headers=headers,
         json=json_data,
     )
-    # print(response.json()['HtmlContent'])
-    soup = BeautifulSoup(response.json()['HtmlContent'], "lxml")
-    products = soup.find_all('a', class_="internalLinkMultiLines")
-    for product in products:
-        print(product.get('href'))
-        
+    try:
+        soup = BeautifulSoup(response.json()['HtmlContent'], "lxml")
+        products = soup.find_all('a', class_="internalLinkMultiLines")
+        for product in products:
+            print(product.get('href'))
+            with open('products_list1.txt', 'a') as txt_file:
+                txt_file.write("%s,\n" % product.get('href'))
+        if len(products) == 10:
+            return True
+        else:
+            return False
+    except Exception as e:
+        print(e)
+
+
+
+def start_parser():
+    list_of_nodes = get_node_id_from_url(get_urls())
+    for item in list_of_nodes:
+        pages = True
+        i= 1
+        while pages:
+            try:
+                if get_info_from_api(item, i) == True:
+                    get_info_from_api(item, i)
+                    i+=1
+                    print(i)
+                else:pages = False
+            except:
+                pass
+
+
+
+start_parser()
