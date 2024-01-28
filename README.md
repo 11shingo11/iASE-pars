@@ -13,6 +13,7 @@
 - psycopg2 - для работы с базой данных PostgreSQL
 
 Вы можете установить все зависимости - из файла requirements.txt
+pip install -r requirements.txt
 
 # Подготовка к запуску
 - Загрузите драйвер Chrome для Selenium и укажите путь к исполняемому файлу в переменной executable_path.

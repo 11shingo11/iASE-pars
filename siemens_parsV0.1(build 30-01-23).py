@@ -67,7 +67,7 @@ for id_num in id_nums:
     # исключение срабатывает если ветка развернута полностью, результат записывается в виде ссылки в отдельный файл для
     # каждой итерации и цикл продолжается до конца списка id_nums
     except:
-        with open('резервный список продуктов 06-02-2023.txt', 'a') as txt_file:
+        with open('catalog_links.txt', 'a') as txt_file:
             txt_file.write("%s,\n" % f"https://mall.industry.siemens.com/mall/en/ru/Catalog/Products/{id_num}?tree=CatalogTree")
         pass
         print("конечная страница "+f"https://mall.industry.siemens.com/mall/en/ru/Catalog/Products/{id_num}?tree=CatalogTree")
@@ -89,7 +89,7 @@ worksheet['G1'] = 'link_production'
 with open("products_list1.txt", "r") as file:
     products = file.readlines()
 products = [line.strip().rstrip(',') for line in products]
-with open("резервный список продуктов 06-02-2023.txt", "r") as file:
+with open("catalog_links.txt", "r") as file:
     lines = file.readlines()
 lines = [line.strip().rstrip(',') for line in lines]
 
