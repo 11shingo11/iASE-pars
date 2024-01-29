@@ -2,7 +2,7 @@ import urllib
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, parse_qs
-
+import gc
 
 cookies = {
     'uc|GXj83XOdm|s-0': 'oblP60NVHBW|1|J39GyuWQq|1|nGKcQgAF|1|BJ_ocNjds-X|1|r1HocEjOiWm|1|BJ59EidsWQ|1|7mOrpUraa|1|PrLTkYnq|1|YLJp7oa1I|1|uQiyefbRi|1|8eIqa_sKr|1|F-REmjGq7|1|_YzvH8nm2|1|HkIVcNiuoZX|1|S1MLTlkEX|1|BJf5EjOi-X|1|rH1vNPCFR|1|S1hmcVouiZm|1|_SBGD5koD|1|Xl0HIOViY|1|BkZ_qViOj-7|1|S1kgcNo_j-m|1|MG6mo4hTJ|1|yLsP4len5|1|HJMSxqVj_ibm|1|UkROORpAd|1|N2vwT-gQn|1|Cf2NHO6q5|1|N5uvpK-j|1|gMYO_vhh|1|_P8Dj4_id|1|H1GSqEodjZX|1|HkPBYFofN|1|S1pcEj_jZX|1|BkWrc4j_s-Q|1|sZAqOmbXv|1|BJz7qNsdj-7|1|HyldcVsOo-m|1|0XIfeH9qx|1|LNZGBYJCq|1|Sy1naC5nN|1|65JrtAVaP|1|tnfBi7gwe|1|SkEscVsusbX|1|0V-E5N_GQ|1|BJTzqNi_i-m|1|SyUQ54odobQ|1|U8QkTd2W|1|ctDbl6j2y|1|j7Igy6o8D|1|H1PKqNodoWQ|1|Sy7BcNo_ib7|1|XYQZBUojc|1|9V8bg4D63|1|S1_9Vsuj-Q|1|rJJjcVouoZ7|1|JQ2XQxIk|1|Hkx754i_iWm|1|HkMucNoOjWX|1|ByBFq4idoZQ|1|r144c4odsbm|1|BgFFtPqMi|1|HkocEodjb7|1|gkEBFID-V|1|d_5HNF7Yc|1|Skj79NodobQ|1|Sk9kb5VoOi-7|1|0vHbD98mH|1|B1NA5VjdjbX|1|rJ99c4oOo-X|1|SkPc5EjOsWm|1|dsS7z9Hv4|1|r1EWc4iuj-X|1|rkqVqNoOib7|1|rkBBg94sdiW7|1|O97xcRJFR|1|M9Nj9klGy|1|rkT1x5Eo_ibm|1|H1dDqVjOjWX|1|a2XkayMLT|1|BJmZ9Nids-m|1|Hx4zBfT2s69AbN|1',
@@ -92,12 +92,12 @@ def get_info_from_api(node_id, page):
         soup = BeautifulSoup(response.json()['HtmlContent'], "lxml")
         products = soup.find_all('a', class_="internalLinkMultiLines")
         for product in products:
-            print(product.get('href'))
             with open('products_list1.txt', 'a') as txt_file:
                 txt_file.write("%s,\n" % product.get('href'))
         if len(products) == 10:
             return True
         else:
+            response.close()
             return False
     except Exception as e:
         print(e)
@@ -108,17 +108,19 @@ def start_parser():
     list_of_nodes = get_node_id_from_url(get_urls())
     for item in list_of_nodes:
         pages = True
-        i= 1
+        i = 1
         while pages:
             try:
-                if get_info_from_api(item, i) == True:
+                if get_info_from_api(item, i):
                     get_info_from_api(item, i)
-                    i+=1
-                    print(i)
-                else:pages = False
+                    i += 1
+                else:
+                    list_of_nodes.remove(item)
+                    gc.collect()
+                    pages = False
             except:
                 pass
 
 
-
-start_parser()
+if __name__ == "__main__":
+    start_parser()
